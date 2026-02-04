@@ -1,31 +1,41 @@
 import { useParams } from "react-router-dom";
-import news from "../data/news";
+import { useEffect, useState } from "react";
+import { fetchSingleNews } from "../api";
 
 function NewsDetail() {
   const { id } = useParams();
-  const article = news.find((n) => n.id === Number(id));
+
+  const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSingleNews(id).then((data) => {
+      setArticle(data);
+      setLoading(false);
+    });
+  }, [id]);
+
+  if (loading) {
+    return <p className="text-center mt-10">Loading...</p>;
+  }
 
   if (!article) {
-    return <div className="text-center py-10">News not found</div>;
+    return <p className="text-center mt-10">News not found</p>;
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-10 ">
-      <span className="text-red-600 font-semibold text-sm">
-        {article.category}
-      </span>
-
-      <h1 className="mt-2 text-3xl font-bold text-gray-900">
+    <main className="max-w-4xl mx-auto px-6 py-10">
+      <h1 className="text-3xl font-bold mb-4">
         {article.title}
       </h1>
 
       <img
         src={article.image}
         alt={article.title}
-        className="w-full h-80 object-cover rounded-lg my-6"
+        className="w-full rounded mb-6"
       />
 
-      <p className="text-gray-700 leading-relaxed text-lg">
+      <p className="text-gray-700 ">
         {article.summary}
       </p>
     </main>

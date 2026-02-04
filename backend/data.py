@@ -28,4 +28,53 @@ news_data = [
         "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
         "summary": "A memorable victory for the Indian team."
     },
+    {
+        "id": 5,
+        "title": "India wins thrilling match in international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team."
+    },
+    {
+        "id": 6,
+        "title": "India wins thrilling match in international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team."
+    },
+    {
+        "id": 11,
+        "title": "India wins thrilling match in international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team."
+    },
+    {
+        "id": 7,
+        "title": "India wins thrilling match in international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team."
+    },
+    {
+        "id": 8,
+        "title": "India wins thrilling match in international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team."
+    },
+    {
+        "id": 9,
+        "title": "India wins thrilling match in international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team."
+    },
+    {
+        "id": 10,
+        "title": "India wins thrilling match inwefwe international tournament",
+        "category": "Sports",
+        "image": "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        "summary": "A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team.A memorable victory for the Indian team."
+    },
 ]

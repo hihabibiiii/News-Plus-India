@@ -1,5 +1,5 @@
 export default {
-  darkMode: "class",   // ✅ MUST
+  darkMode: "class",  
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {},

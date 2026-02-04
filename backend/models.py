@@ -1,8 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 
 class News(BaseModel):
-    id: int
+    id: Optional[str] = Field(None)
     title: str
-    category: str
-    image: str
     summary: str
+    content: str
+    image: str
+    category: str
+    is_hero: bool = False

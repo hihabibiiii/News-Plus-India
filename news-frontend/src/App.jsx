@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
   Route,
   useLocation,
 } from "react-router-dom";
+
+import { fetchAllNews } from "./api";
 
 import Header from "./components/Header";
 import HeroSlider from "./components/HeroSlider";
@@ -12,19 +15,35 @@ import Footer from "./components/Footer";
 
 import Category from "./pages/Category";
 import NewsDetail from "./pages/NewsDetail";
-import news from "./data/news";
+
+import AdminLogin from "./admin/AdminLogin";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminRoute from "./admin/AdminRoute";
+import AdminAddNews from "./admin/AdminAddNews";
 
 function Layout() {
   const location = useLocation();
 
-  // 🔴 Hero sirf Home page par dikhe
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAllNews().then((data) => {
+      setNews(data);
+      setLoading(false);
+    });
+  }, []);
+
+  // 🔹 Hero sirf Home par
   const hideHero =
     location.pathname.startsWith("/news/") ||
-    location.pathname.startsWith("/category/");
+    location.pathname.startsWith("/category/") ||
+    location.pathname.startsWith("/admin");
 
   return (
-    <>
-      <Header />
+    <div className="min-h-screen bg-white text-black">
+      {/* ❌ Admin pages par Header/Footer nahi */}
+      {!location.pathname.startsWith("/admin") && <Header />}
 
       {!hideHero && <HeroSlider category="All" />}
 
@@ -34,37 +53,60 @@ function Layout() {
           path="/"
           element={
             <main className="max-w-7xl mx-auto px-6 py-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold mb-6">
                 Top Headlines
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {news.map((item) => (
-                  <NewsCard key={item.id} {...item} />
-                ))}
-              </div>
+              {loading ? (
+                <p className="text-center">Loading news...</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {news.map((item) => (
+                    <NewsCard key={item.id} {...item} />
+                  ))}
+                </div>
+              )}
             </main>
           }
         />
 
-        {/* 📂 CATEGORY PAGE */}
+        {/* 📂 CATEGORY */}
         <Route path="/category/:name" element={<Category />} />
 
         {/* 📰 SINGLE NEWS */}
         <Route path="/news/:id" element={<NewsDetail />} />
-      </Routes>
 
-      <Footer />
-    </>
+        {/* 🔐 ADMIN LOGIN */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* 🔐 ADMIN DASHBOARD (PROTECTED) */}
+        <Route
+  path="/admin/dashboard"
+  element={
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  }
+/>
+ <Route
+    path="/admin/add"
+    element={
+      <AdminRoute>
+        <AdminAddNews />
+      </AdminRoute>
+    }
+  />
+ </Routes>
+
+      {!location.pathname.startsWith("/admin") && <Footer />}
+    </div>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Layout />
     </BrowserRouter>
   );
 }
-
-export default App;
