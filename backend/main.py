@@ -1,7 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import UploadFile, File, Form
+from fastapi.staticfiles import StaticFiles
+import os, shutil
 from bson import ObjectId
+import re
 
 
 from database import news_collection
@@ -13,14 +17,15 @@ from dependencies import admin_required
 app = FastAPI(title="News Plus India API")
 
 # ✅ CORS FIX
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # 👈 IMPORTANT
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],   # PUT / POST / DELETE allow
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # ---------------- HOME ----------------
 @app.get("/")
@@ -39,12 +44,63 @@ def admin_login(form: OAuth2PasswordRequestForm = Depends()):
     token = create_token({"sub": form.username})
     return {"access_token": token, "token_type": "bearer"}
 
+##slug
+def make_slug(text: str):
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")
+
 # ---------------- ADD NEWS ----------------
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @app.post("/admin/news")
-def add_news(news: dict, admin=Depends(admin_required)):
-    result = news_collection.insert_one(news)
-    news["_id"] = str(result.inserted_id)
-    return {"message": "News added successfully", "news": news}
+def add_news(
+    title: str = Form(...),
+    summary: str = Form(...),
+    content: str = Form(...),
+    category: str = Form(...),
+    is_hero: bool = Form(False),
+    image_url: str = Form(None),
+    image_file: UploadFile = File(None),
+):
+    image = None
+
+    # 🔹 Image upload
+    if image_file:
+        filename = f"{ObjectId()}_{image_file.filename}"
+        file_path = os.path.join(UPLOAD_DIR, filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image_file.file, buffer)
+
+        image = f"http://127.0.0.1:8000/uploads/{filename}"
+
+    # 🔹 Image URL
+    elif image_url:
+        image = image_url
+
+    # 🔹 SLUG (🔥 MOST IMPORTANT FIX)
+    slug = make_slug(title)
+
+    # agar same slug pehle se ho to unique bana do
+    if news_collection.find_one({"slug": slug}):
+        slug = f"{slug}-{ObjectId()}"
+
+    news_doc = {
+        "title": title,
+        "slug": slug,        # ✅ REQUIRED
+        "summary": summary,
+        "content": content,
+        "category": category,
+        "image": image,
+        "is_hero": is_hero,
+    }
+
+    news_collection.insert_one(news_doc)
+
+    return {"message": "News added successfully"}
 
 
 # ---------------- DELETE NEWS ----------------
@@ -120,18 +176,37 @@ def delete_news(news_id: str, admin=Depends(admin_required)):
 
 
 @app.put("/admin/news/{id}")
-def update_news(id: str, news: dict, admin=Depends(admin_required)):
-    
-    # 🔥 IMPORTANT: _id को हटाओ
-    if "_id" in news:
-        del news["_id"]
+def update_news(
+    id: str,
+    title: str = Form(...),
+    summary: str = Form(...),
+    content: str = Form(...),
+    category: str = Form(...),
+    is_hero: bool = Form(False),
+    image_url: str = Form(None),
+    image_file: UploadFile = File(None),
+):
+    update_data = {
+        "title": title,
+        "summary": summary,
+        "content": content,
+        "category": category,
+        "is_hero": is_hero,
+    }
 
-    result = news_collection.update_one(
+    if image_file:
+        filename = f"{ObjectId()}_{image_file.filename}"
+        path = os.path.join(UPLOAD_DIR, filename)
+        with open(path, "wb") as f:
+            shutil.copyfileobj(image_file.file, f)
+        update_data["image"] = f"http://127.0.0.1:8000/uploads/{filename}"
+
+    elif image_url:
+        update_data["image"] = image_url
+
+    news_collection.update_one(
         {"_id": ObjectId(id)},
-        {"$set": news}
+        {"$set": update_data}
     )
 
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="News not found")
-
-    return {"message": "News updated successfully"}
+    return {"message": "News updated"}

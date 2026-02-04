@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { addNews } from "../api";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminAddNews() {
@@ -10,10 +9,12 @@ export default function AdminAddNews() {
     title: "",
     summary: "",
     content: "",
-    image: "",
     category: "",
     is_hero: false,
   });
+
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -26,8 +27,35 @@ export default function AdminAddNews() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await addNews(token, form);
-    alert("✅ News added successfully");
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("summary", form.summary);
+    formData.append("content", form.content);
+    formData.append("category", form.category);
+
+    // 🔥 IMPORTANT: boolean as string
+    formData.append("is_hero", form.is_hero ? "true" : "false");
+
+    if (imageFile) {
+      formData.append("image_file", imageFile);
+    } else if (imageUrl) {
+      formData.append("image_url", imageUrl);
+    }
+
+    const res = await fetch("http://127.0.0.1:8000/admin/news", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      alert("Error adding news");
+      return;
+    }
+
+    alert("News published successfully");
     navigate("/admin/dashboard");
   };
 
@@ -36,6 +64,7 @@ export default function AdminAddNews() {
       <h1 className="text-3xl font-bold mb-6">Add News</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* TITLE */}
         <input
           name="title"
           placeholder="Title"
@@ -44,14 +73,43 @@ export default function AdminAddNews() {
           required
         />
 
+        {/* IMAGE URL */}
         <input
-          name="image"
-          placeholder="Image URL"
-          className="w-full border p-2"
-          onChange={handleChange}
-          required
+          type="text"
+          placeholder="Image URL (optional)"
+          value={imageUrl}
+          disabled={!!imageFile}
+          onChange={(e) => setImageUrl(e.target.value)}
+          className={`w-full border p-2 ${
+            imageFile ? "bg-gray-100 cursor-not-allowed" : ""
+          }`}
         />
 
+        <p className="text-center text-gray-500">OR</p>
+
+        {/* IMAGE FILE */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            setImageFile(e.target.files[0]);
+            setImageUrl("");
+          }}
+        />
+
+        {/* PREVIEW */}
+        {imageFile && (
+          <img
+            src={URL.createObjectURL(imageFile)}
+            className="h-40 rounded object-cover"
+          />
+        )}
+
+        {!imageFile && imageUrl && (
+          <img src={imageUrl} className="h-40 rounded object-cover" />
+        )}
+
+        {/* CATEGORY */}
         <select
           name="category"
           className="w-full border p-2"
@@ -65,10 +123,9 @@ export default function AdminAddNews() {
           <option>Sports</option>
           <option>Business</option>
           <option>Technology</option>
-          <option>Entertainment</option>
-          <option>Health</option>
         </select>
 
+        {/* SUMMARY */}
         <textarea
           name="summary"
           placeholder="Summary"
@@ -78,6 +135,7 @@ export default function AdminAddNews() {
           required
         />
 
+        {/* CONTENT */}
         <textarea
           name="content"
           placeholder="Full Content"
@@ -87,7 +145,8 @@ export default function AdminAddNews() {
           required
         />
 
-        <label className="flex items-center gap-2">
+        {/* HERO */}
+        <label className="flex gap-2">
           <input
             type="checkbox"
             name="is_hero"
@@ -96,10 +155,7 @@ export default function AdminAddNews() {
           Show in Hero Slider
         </label>
 
-        <button
-          type="submit"
-          className="bg-red-600 text-white px-6 py-2 rounded"
-        >
+        <button className="bg-red-600 text-white px-6 py-2 rounded">
           Publish News
         </button>
       </form>

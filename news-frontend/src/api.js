@@ -75,18 +75,15 @@ export async function deleteAdminNews(token, id) {
   return res.json();
 }
 
-export async function updateAdminNews(token, id, data) {
-  const res = await fetch(
-    `http://127.0.0.1:8000/admin/news/${id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
+export async function updateAdminNews(token, id, formData) {
+  const res = await fetch(`http://127.0.0.1:8000/admin/news/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      // ❌ Content-Type मत डालो
+    },
+    body: formData,
+  });
 
   return res.json();
 }
