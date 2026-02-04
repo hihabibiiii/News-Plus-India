@@ -13,11 +13,12 @@ from dependencies import admin_required
 app = FastAPI(title="News Plus India API")
 
 # ✅ CORS FIX
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],   # 👈 IMPORTANT
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],   # PUT / POST / DELETE allow
     allow_headers=["*"],
 )
 
@@ -55,30 +56,39 @@ def delete_news(id: str, admin=Depends(admin_required)):
 # ---------------- ALL NEWS ----------------
 @app.get("/news")
 def get_all_news():
-    news = list(news_collection.find())
-    for n in news:
-        n["_id"] = str(n["_id"])
+    news = []
+    for n in news_collection.find().sort("_id", -1):
+        n["id"] = str(n["_id"])   # ✅ IMPORTANT
+        del n["_id"]
+        news.append(n)
     return news
+
 
 
 # ---------------- HERO NEWS ----------------
 @app.get("/news/hero")
 def hero_news():
-    news = list(news_collection.find({"is_hero": True}).limit(5))
-    for n in news:
-        n["_id"] = str(n["_id"])
+    news = []
+    for n in news_collection.find({"is_hero": True}).sort("_id", -1).limit(5):
+        n["id"] = str(n["_id"])
+        del n["_id"]
+        news.append(n)
     return news
+
 
 
 # ---------------- CATEGORY NEWS ----------------
 @app.get("/news/category/{category}")
 def get_news_by_category(category: str):
-    news = list(news_collection.find({
+    news = []
+    for n in news_collection.find({
         "category": {"$regex": f"^{category}$", "$options": "i"}
-    }))
-    for n in news:
-        n["_id"] = str(n["_id"])
+    }):
+        n["id"] = str(n["_id"])
+        del n["_id"]
+        news.append(n)
     return news
+
 
 
 # ---------------- SINGLE NEWS ----------------
@@ -91,7 +101,37 @@ def get_single_news(news_id: str):
     news["_id"] = str(news["_id"])
     return news
 
-@app.get("/test-db")
-def test_db():
-    count = news_collection.count_documents({})
-    return {"mongo": "connected", "documents": count}
+@app.get("/admin/news")
+def admin_get_news(admin=Depends(admin_required)):
+    news = list(news_collection.find())
+    for n in news:
+        n["_id"] = str(n["_id"])
+    return news
+
+
+
+@app.delete("/admin/news/{news_id}")
+def delete_news(news_id: str, admin=Depends(admin_required)):
+    result = news_collection.delete_one({"_id": ObjectId(news_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="News not found")
+    return {"message": "News deleted successfully"}
+
+
+
+@app.put("/admin/news/{id}")
+def update_news(id: str, news: dict, admin=Depends(admin_required)):
+    
+    # 🔥 IMPORTANT: _id को हटाओ
+    if "_id" in news:
+        del news["_id"]
+
+    result = news_collection.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": news}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="News not found")
+
+    return {"message": "News updated successfully"}

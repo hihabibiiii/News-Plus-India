@@ -20,6 +20,8 @@ import AdminLogin from "./admin/AdminLogin";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminRoute from "./admin/AdminRoute";
 import AdminAddNews from "./admin/AdminAddNews";
+import AdminEditNews from "./admin/AdminEditNews";
+
 
 function Layout() {
   const location = useLocation();
@@ -96,6 +98,15 @@ function Layout() {
       </AdminRoute>
     }
   />
+  <Route
+  path="/admin/edit/:id"
+  element={
+    <AdminRoute>
+      <AdminEditNews />
+    </AdminRoute>
+  }
+/>
+
  </Routes>
 
       {!location.pathname.startsWith("/admin") && <Footer />}

@@ -56,17 +56,39 @@ export async function addNews(token, data) {
   return res.json();
 }
 
-// ❌ Delete news (ADMIN)
-export async function deleteNews(token, id) {
+export async function fetchAdminNews(token) {
+  const res = await fetch("http://127.0.0.1:8000/admin/news", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.json();
+}
+
+export async function deleteAdminNews(token, id) {
+  const res = await fetch(`http://127.0.0.1:8000/admin/news/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.json();
+}
+
+export async function updateAdminNews(token, id, data) {
   const res = await fetch(
-    `${API_BASE_URL}/admin/news/${id}`,
+    `http://127.0.0.1:8000/admin/news/${id}`,
     {
-      method: "DELETE",
+      method: "PUT",
       headers: {
         "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(data),
     }
   );
 
   return res.json();
 }
+
+
