@@ -17,10 +17,14 @@ os.makedirs("uploads", exist_ok=True)
 app = FastAPI(title="News Plus India API")
 
 # ✅ CORS FIX
+origins = [
+    "http://localhost:5173",
+    "https://your-vercel-domain.vercel.app"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # production me specific domain better
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

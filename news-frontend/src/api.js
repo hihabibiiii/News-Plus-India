@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // 📰 Get all news
 export async function fetchAllNews() {
@@ -8,9 +8,7 @@ export async function fetchAllNews() {
 
 // 📂 Get category news
 export async function fetchCategoryNews(category) {
-  const res = await fetch(
-    `${API_BASE_URL}/news/category/${category}`
-  );
+  const res = await fetch(`${API_BASE_URL}/news/category/${category}`);
   return res.json();
 }
 
@@ -33,10 +31,7 @@ export async function adminLogin(username, password) {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: new URLSearchParams({
-      username,
-      password,
-    }),
+    body: new URLSearchParams({ username, password }),
   });
 
   return res.json();
@@ -47,7 +42,7 @@ export async function addNews(token, data) {
   const res = await fetch(`${API_BASE_URL}/admin/news`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
@@ -56,36 +51,39 @@ export async function addNews(token, data) {
   return res.json();
 }
 
+// 📋 Get admin news
 export async function fetchAdminNews(token) {
-  const res = await fetch("http://127.0.0.1:8000/admin/news", {
+  const res = await fetch(`${API_BASE_URL}/admin/news`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+
   return res.json();
 }
 
+// ❌ Delete news
 export async function deleteAdminNews(token, id) {
-  const res = await fetch(`http://127.0.0.1:8000/admin/news/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/admin/news/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+
   return res.json();
 }
 
+// ✏️ Update news (FormData)
 export async function updateAdminNews(token, id, formData) {
-  const res = await fetch(`http://127.0.0.1:8000/admin/news/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/admin/news/${id}`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`,
-      // ❌ Content-Type मत डालो
+      // ❗ Content-Type mat daalo (FormData auto set karega)
     },
     body: formData,
   });
 
   return res.json();
 }
-
-
