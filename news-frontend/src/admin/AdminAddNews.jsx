@@ -42,13 +42,15 @@ export default function AdminAddNews() {
       formData.append("image_url", imageUrl);
     }
 
-    const res = await fetch("http://127.0.0.1:8000/admin/news", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+    const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+const res = await fetch(`${API_BASE_URL}/admin/news`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  body: formData,
+});
 
     if (!res.ok) {
       alert("Error adding news");
