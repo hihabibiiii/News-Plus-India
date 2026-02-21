@@ -14,3 +14,15 @@ if not MONGO_URL:
 client = MongoClient(MONGO_URL)
 db = client[DB_NAME]
 news_collection = db["news"]
+from pymongo import MongoClient
+import os
+
+MONGO_URL = os.getenv("MONGODB_URL")
+
+try:
+    client = MongoClient(MONGO_URL)
+    db = client["newsdb"]
+    client.admin.command("ping")
+    print("✅ MongoDB Connected")
+except Exception as e:
+    print("❌ MongoDB Connection Failed:", e)
