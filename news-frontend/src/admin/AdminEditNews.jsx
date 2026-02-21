@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export default function AdminEditNews() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function AdminEditNews() {
       });
       setImageUrl(data.image || "");
     });
-}, [id]);
+}, [id, API_BASE_URL]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

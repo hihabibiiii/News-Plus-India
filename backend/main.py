@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 import os, shutil
 from bson import ObjectId
 import re
-
+BASE_URL = "https://news-plus-india-production.up.railway.app"
 
 from database import news_collection
 from models import News
