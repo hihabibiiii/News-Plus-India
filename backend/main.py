@@ -210,3 +210,11 @@ def update_news(
     )
 
     return {"message": "News updated"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+@app.get("/db-test")
+def db_test():
+    count = news_collection.count_documents({})
+    return {"news_count": count}

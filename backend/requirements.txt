@@ -1,6 +1,8 @@
 fastapi
 uvicorn
 pymongo
-python-jose
+python-dotenv
+dnspython
 passlib[bcrypt]
+python-jose
 python-multipart

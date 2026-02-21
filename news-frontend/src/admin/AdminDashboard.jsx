@@ -8,10 +8,23 @@ export default function AdminDashboard() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    if (!token) {
+      navigate("/admin/login");
+      return;
+    }
+
     fetchAdminNews(token).then((data) => {
       setNews(data || []);
     });
   }, []);
+
+  // 🔴 LOGOUT
+  const handleLogout = () => {
+    if (!window.confirm("Are you sure you want to logout?")) return;
+
+    localStorage.removeItem("token");
+    navigate("/admin/login");
+  };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this news?")) return;
@@ -21,19 +34,30 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6">
-      {/* 🔥 HEADER + ADD BUTTON (ALWAYS VISIBLE) */}
+      {/* 🔥 HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
 
-        <button
-          onClick={() => navigate("/admin/add")}
-          className="bg-green-600 text-white px-4 py-2 rounded"
-        >
-          + Add News
-        </button>
+        <div className="flex gap-3">
+          {/* ADD NEWS */}
+          <button
+            onClick={() => navigate("/admin/add")}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            + Add News
+          </button>
+
+          {/* LOGOUT */}
+          <button
+            onClick={handleLogout}
+            className="bg-gray-800 text-white px-4 py-2 rounded"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
-      {/* ⚠️ NO NEWS MESSAGE */}
+      {/* ⚠️ NO NEWS */}
       {news.length === 0 && (
         <p className="text-gray-500">
           No news found. Click <b>Add News</b> to publish your first news.
