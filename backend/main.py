@@ -7,7 +7,6 @@ import os, shutil
 from bson import ObjectId
 import re
 
-app = FastAPI()
 
 from database import news_collection
 from models import News
@@ -57,8 +56,10 @@ def make_slug(text: str):
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 @app.post("/admin/news")
 def add_news(
+    request: Request,
     title: str = Form(...),
     summary: str = Form(...),
     content: str = Form(...),
@@ -69,6 +70,9 @@ def add_news(
 ):
     image = None
 
+    # 🔹 dynamic base URL (Railway compatible)
+    base_url = str(request.base_url).rstrip("/")
+
     # 🔹 Image upload
     if image_file:
         filename = f"{ObjectId()}_{image_file.filename}"
@@ -77,22 +81,21 @@ def add_news(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image_file.file, buffer)
 
-        image = f"http://127.0.0.1:8000/uploads/{filename}"
+        image = f"{base_url}/uploads/{filename}"   # ✅ FIXED
 
     # 🔹 Image URL
     elif image_url:
         image = image_url
 
-    # 🔹 SLUG (🔥 MOST IMPORTANT FIX)
+    # 🔹 SLUG
     slug = make_slug(title)
 
-    # agar same slug pehle se ho to unique bana do
     if news_collection.find_one({"slug": slug}):
         slug = f"{slug}-{ObjectId()}"
 
     news_doc = {
         "title": title,
-        "slug": slug,        # ✅ REQUIRED
+        "slug": slug,
         "summary": summary,
         "content": content,
         "category": category,
@@ -103,7 +106,6 @@ def add_news(
     news_collection.insert_one(news_doc)
 
     return {"message": "News added successfully"}
-
 
 # ---------------- DELETE NEWS ----------------
 @app.delete("/admin/news/{id}")
@@ -179,6 +181,7 @@ def delete_news(news_id: str, admin=Depends(admin_required)):
 
 @app.put("/admin/news/{id}")
 def update_news(
+    request: Request,
     id: str,
     title: str = Form(...),
     summary: str = Form(...),
@@ -188,6 +191,8 @@ def update_news(
     image_url: str = Form(None),
     image_file: UploadFile = File(None),
 ):
+    base_url = str(request.base_url).rstrip("/")
+
     update_data = {
         "title": title,
         "summary": summary,
@@ -201,7 +206,8 @@ def update_news(
         path = os.path.join(UPLOAD_DIR, filename)
         with open(path, "wb") as f:
             shutil.copyfileobj(image_file.file, f)
-        update_data["image"] = f"http://127.0.0.1:8000/uploads/{filename}"
+
+        update_data["image"] = f"{base_url}/uploads/{filename}"   # ✅ FIXED
 
     elif image_url:
         update_data["image"] = image_url
@@ -212,6 +218,8 @@ def update_news(
     )
 
     return {"message": "News updated"}
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -224,6 +232,3 @@ def db_test():
 @app.get("/")
 def root():
     return {"message": "API running"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
