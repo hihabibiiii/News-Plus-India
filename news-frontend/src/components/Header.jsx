@@ -43,7 +43,7 @@ function Header() {
             alt="News Plus India"
             className="h-15 w-15 object-contain"
           />
-          <h1 className="text-3xl md:text-4xl font-extrabold text-red-500 tracking-wide">
+          <h1 className="text-3xl md:text-2xl font-extrabold text-red-500 tracking-wide">
             News Plus India
           </h1>
         </div>
