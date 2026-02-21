@@ -19,19 +19,19 @@ export default function AdminEditNews() {
 
   // 🔹 LOAD NEWS
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/news/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setForm({
-          title: data.title,
-          summary: data.summary,
-          content: data.content,
-          category: data.category,
-          is_hero: data.is_hero,
-        });
-        setImageUrl(data.image || "");
+  fetch(`${API_BASE_URL}/news/${id}`)
+    .then((res) => res.json())
+    .then((data) => {
+      setForm({
+        title: data.title,
+        summary: data.summary,
+        content: data.content,
+        category: data.category,
+        is_hero: data.is_hero,
       });
-  }, [id]);
+      setImageUrl(data.image || "");
+    });
+}, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -56,15 +56,15 @@ export default function AdminEditNews() {
     }
 
     const res = await fetch(
-      `http://127.0.0.1:8000/admin/news/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      }
-    );
+  `${API_BASE_URL}/admin/news/${id}`,
+  {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  }
+);
 
     if (!res.ok) {
       alert("Image update failed");
