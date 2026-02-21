@@ -7,6 +7,7 @@ import os, shutil
 from bson import ObjectId
 import re
 
+app = FastAPI()
 
 from database import news_collection
 from models import News
@@ -219,3 +220,10 @@ def health():
 def db_test():
     count = news_collection.count_documents({})
     return {"news_count": count}
+
+@app.get("/")
+def root():
+    return {"message": "API running"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
