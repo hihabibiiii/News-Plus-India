@@ -13,13 +13,14 @@ from models import News
 from auth import ADMIN, verify_password
 from security import create_token
 from dependencies import admin_required
-
+os.makedirs("uploads", exist_ok=True)
 app = FastAPI(title="News Plus India API")
 
 # ✅ CORS FIX
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
